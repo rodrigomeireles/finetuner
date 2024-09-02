@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "packaging>=24.1",
+    "python-fire>=0.1.0",
     "torch>=2.4.0",
     "unsloth[cu121-torch240]",
     "wandb>=0.17.8",
