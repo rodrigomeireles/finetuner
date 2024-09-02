@@ -75,6 +75,28 @@ class FinetuneModel:
             loftq_config=None,
         )
 
+    def preprocess_data(self, dataset):
+        with open(self.prompt_format_path, "r") as file:
+            merge_prompt = file.read()
+
+        with open(self.chat_format_path, "r") as file:
+            chat_template = file.read()
+
+        dataset = to_sharegpt(
+            dataset,
+            merged_prompt=merge_prompt,
+            output_column_name="Answer",
+        )
+
+        dataset = standardize_sharegpt(dataset)
+
+        dataset = apply_chat_template(
+            dataset,
+            tokenizer=self.tokenizer,
+            chat_template=chat_template,
+        )
+        return dataset
+
     def load_dataset(self):
         self.dataset = load_dataset(self.dataset_name, split="train")
 
