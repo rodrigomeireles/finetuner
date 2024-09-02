@@ -75,44 +75,21 @@ class FinetuneModel:
             loftq_config=None,
         )
 
-    def preprocess_data(self, dataset):
+    def load_dataset(self):
+        self.dataset = load_dataset(self.dataset_name)
         with open(self.prompt_format_path, "r") as file:
             merge_prompt = file.read()
 
         with open(self.chat_format_path, "r") as file:
             chat_template = file.read()
 
-        dataset = to_sharegpt(
-            dataset,
-            merged_prompt=merge_prompt,
-            output_column_name="Answer",
-        )
-
-        dataset = standardize_sharegpt(dataset)
-
-        dataset = apply_chat_template(
-            dataset,
-            tokenizer=self.tokenizer,
-            chat_template=chat_template,
-        )
-        return dataset
-
-    def load_dataset(self):
-        self.dataset = load_dataset(self.dataset_name, split="train")
-
-    def prepare_dataset(self):
-        with open(self.prompt_format_path, "r") as f:
-            merge_prompt = f.read()
-
-        with open(self.chat_format_path, "r") as f:
-            chat_template = f.read()
-
         self.dataset = to_sharegpt(
             self.dataset,
             merged_prompt=merge_prompt,
             output_column_name="Answer",
         )
-        self.dataset = standardize_sharegpt(self.dataset)
+
+        self.dataset = standardize_sharegpt(dataset)
 
         self.dataset = apply_chat_template(
             self.dataset,
@@ -124,7 +101,8 @@ class FinetuneModel:
         trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
-            train_dataset=self.dataset,
+            train_dataset=self.dataset["train"],
+            eval_dataset=self.dataset["validation"],
             dataset_text_field="text",
             max_seq_length=self.max_seq_length,
             dataset_num_proc=2,
