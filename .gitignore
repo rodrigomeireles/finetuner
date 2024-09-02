@@ -1,3 +1,7 @@
 wandb
 .env
 .venv
+_unsloth_temporary_saved_buffers
+llama.cpp
+lora_model
+outputs

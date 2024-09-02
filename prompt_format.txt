@@ -1,0 +1,19 @@
+Answer questions with short factoid answers.
+
+---
+
+Follow the following format.
+
+Context: May contain relevant facts
+
+Question: question
+
+Answer: uses financial vocabulary
+
+---
+
+Context: {context_1}\n{context_2}\n{context_3}
+
+Question: {Question}
+
+Answer:

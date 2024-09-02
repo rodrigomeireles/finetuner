@@ -8,7 +8,7 @@ from unsloth import (
 )
 from datasets import load_dataset
 from trl import SFTTrainer
-from transformers import TrainingArguments
+from transformers import TrainingArguments, EarlyStoppingCallback
 from unsloth import is_bfloat16_supported
 import fire
 
@@ -37,14 +37,14 @@ class FinetuneModel:
         self.setup_environment()
         self.load_model()
         self.load_dataset()
-        self.prepare_dataset()
         self.train_model()
+        self.evaluate()
         self.save_model()
 
     def setup_environment(self):
         os.environ["WANDB_PROJECT"] = "llama-3.1-financial-assistant"
-        os.environ["WANDB_LOG_MODEL"] = "checkpoint"
-        os.environ["WANDB_WATCH"] = "false"
+        os.environ["WANDB_LOG_MODEL"] = "end"
+        os.environ["WANDB_WATCH"] = "all"
 
     def load_model(self):
         self.model, self.tokenizer = FastLanguageModel.from_pretrained(
@@ -83,19 +83,20 @@ class FinetuneModel:
         with open(self.chat_format_path, "r") as file:
             chat_template = file.read()
 
-        self.dataset = to_sharegpt(
-            self.dataset,
-            merged_prompt=merge_prompt,
-            output_column_name="Answer",
-        )
+        for key in ["train", "validation", "test"]:
+            self.dataset[key] = to_sharegpt(
+                self.dataset[key],
+                merged_prompt=merge_prompt,
+                output_column_name="Answer",
+            )
 
-        self.dataset = standardize_sharegpt(dataset)
+            self.dataset[key] = standardize_sharegpt(self.dataset[key])
 
-        self.dataset = apply_chat_template(
-            self.dataset,
-            tokenizer=self.tokenizer,
-            chat_template=chat_template,
-        )
+            self.dataset[key] = apply_chat_template(
+                self.dataset[key],
+                tokenizer=self.tokenizer,
+                chat_template=chat_template,
+            )
 
     def train_model(self):
         trainer = SFTTrainer(
@@ -109,8 +110,9 @@ class FinetuneModel:
             packing=False,
             args=TrainingArguments(
                 per_device_train_batch_size=self.batch_size,
+                per_device_eval_batch_size=self.batch_size,
                 warmup_steps=5,
-                num_train_epochs=2,
+                num_train_epochs=4,
                 learning_rate=2e-4,
                 fp16=not is_bfloat16_supported(),
                 bf16=is_bfloat16_supported(),
@@ -121,7 +123,15 @@ class FinetuneModel:
                 seed=3407,
                 report_to="wandb",
                 output_dir="outputs",
+                load_best_model_at_end=True,
+                metric_for_best_model="eval_loss",
+                greater_is_better=False,
+                evaluation_strategy="steps",
+                save_steps=50,
+                save_total_limit=2,  # save only current and best
+                eval_steps=10,
             ),
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
         )
 
         gpu_stats = torch.cuda.get_device_properties(0)
@@ -149,6 +159,15 @@ class FinetuneModel:
             f"Peak reserved memory for training % of max memory = {lora_percentage} %."
         )
 
+    def evaluate(self):
+        import wandb
+
+        results = self.model.evaluate(
+            eval_dataset=self.dataset["test"]
+        )  # Evaluate on test split
+        print(results)
+        wandb.log(results)
+
     def save_model(self):
         self.model.save_pretrained("lora_model")
         self.tokenizer.save_pretrained("lora_model")
@@ -157,8 +176,8 @@ class FinetuneModel:
             self.tokenizer,
             quantization_method=[
                 "q4_k_m",
-                "q8_0",
-                "q5_k_m",
+                # "q8_0",
+                # "q5_k_m",
             ],
         )
 

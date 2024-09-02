@@ -1,0 +1,5 @@
+{SYSTEM}
+
+{INPUT}
+
+Answer: {OUTPUT}
