@@ -160,13 +160,14 @@ class FinetuneModel:
         )
 
     def evaluate(self):
-        import wandb
-
-        results = self.model.evaluate(
-            eval_dataset=self.dataset["test"]
-        )  # Evaluate on test split
-        print(results)
-        wandb.log(results)
+        # import wandb
+        #
+        # results = self.model.evaluate(
+        #     eval_dataset=self.dataset["test"]
+        # )  # Evaluate on test split
+        # print(results)
+        # wandb.log(results)
+        pass
 
     def save_model(self):
         self.model.save_pretrained("lora_model")
