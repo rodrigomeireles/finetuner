@@ -1,0 +1,25 @@
+type: dev-environment
+# The name is optional, if not specified, generated randomly
+name: financial-fine-tuning
+
+# Required environment variables
+env:
+  - HF_TOKEN
+  - WANDB_API_KEY
+
+ide: nvim
+
+spot_policy: auto
+
+# Commands of the task
+commands:
+  - pip install uv
+  - uv run ollama_+_unsloth_+_llama_3_1.py
+
+resources:
+  gpu:
+    # 24GB or more vRAM
+    memory: 10GB..
+    # Two or more GPU
+    count: 1
+
