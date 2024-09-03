@@ -1,7 +1,4 @@
 type: task
-# The name is optional, if not specified, generated randomly
-name: financial-fine-tuning
-
 # Required environment variables
 env:
   - HF_TOKEN

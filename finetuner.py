@@ -45,6 +45,7 @@ class FinetuneModel:
         os.environ["WANDB_PROJECT"] = "llama-3.1-financial-assistant"
         os.environ["WANDB_LOG_MODEL"] = "end"
         os.environ["WANDB_WATCH"] = "all"
+        os.environ["WANDB_NAME"] = "dstack run!"
 
     def load_model(self):
         self.model, self.tokenizer = FastLanguageModel.from_pretrained(
@@ -92,8 +93,8 @@ class FinetuneModel:
 
             self.dataset[key] = standardize_sharegpt(self.dataset[key])
 
-            self.dataset[key] = apply_chat_template(
-                self.dataset[key],
+            self.dataset["train"] = apply_chat_template(
+                self.dataset["train"],
                 tokenizer=self.tokenizer,
                 chat_template=chat_template,
             )
@@ -104,7 +105,6 @@ class FinetuneModel:
             tokenizer=self.tokenizer,
             train_dataset=self.dataset["train"],
             eval_dataset=self.dataset["validation"],
-            dataset_text_field="text",
             max_seq_length=self.max_seq_length,
             dataset_num_proc=2,
             packing=False,
@@ -131,7 +131,7 @@ class FinetuneModel:
                 save_total_limit=2,  # save only current and best
                 eval_steps=10,
             ),
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
         )
 
         gpu_stats = torch.cuda.get_device_properties(0)
