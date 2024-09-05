@@ -1,4 +1,3 @@
-import os
 import torch
 from unsloth import (
     FastLanguageModel,
@@ -105,7 +104,7 @@ class FinetuneModel:
                 per_device_train_batch_size=self.batch_size,
                 per_device_eval_batch_size=self.batch_size,
                 warmup_steps=5,
-                num_train_epochs=4,
+                num_train_epochs=8,
                 learning_rate=2e-4,
                 fp16=not is_bfloat16_supported(),
                 bf16=is_bfloat16_supported(),
@@ -163,8 +162,13 @@ class FinetuneModel:
         pass
 
     def save_model(self):
-        self.model.save_pretrained("lora_model")
-        self.tokenizer.save_pretrained("lora_model")
+        # local saving
+        # self.model.save_pretrained("lora_model")
+        # self.tokenizer.save_pretrained("lora_model")
+        self.model.push_to_hub(
+            self.hf_repo,
+        )
+        self.tokenizer.push_to_hub(self.hf_repo)
         self.model.push_to_hub_gguf(
             self.hf_repo,
             self.tokenizer,

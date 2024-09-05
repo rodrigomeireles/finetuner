@@ -7,7 +7,7 @@ env:
 # Commands of the task
 commands:
   - pip install uv
-  - uv run finetuner.py --model_name="unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit" --dataset_name="britojr/sec10q_v2" --prompt_format_path="prompt_format.txt" --chat_format_path="chat_format.txt" --batch_size=8 --hf_repo="rmeireles/financial-llama-assistant"
+  - uv run finetuner.py --model_name="unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit" --dataset_name="britojr/sec10q_v2" --prompt_format_path="prompt_format.txt" --chat_format_path="chat_format.txt" --batch_size=2 --hf_repo="rmeireles/financial-llama-assistant"
 
 resources:
   gpu:
