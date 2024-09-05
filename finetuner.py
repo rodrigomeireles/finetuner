@@ -34,18 +34,11 @@ class FinetuneModel:
         self.dtype = None
         self.load_in_4bit = True
 
-        self.setup_environment()
         self.load_model()
         self.load_dataset()
         self.train_model()
         self.evaluate()
         self.save_model()
-
-    def setup_environment(self):
-        os.environ["WANDB_PROJECT"] = "llama-3.1-financial-assistant"
-        os.environ["WANDB_LOG_MODEL"] = "end"
-        os.environ["WANDB_WATCH"] = "all"
-        os.environ["WANDB_NAME"] = "dstack run!"
 
     def load_model(self):
         self.model, self.tokenizer = FastLanguageModel.from_pretrained(
@@ -126,7 +119,7 @@ class FinetuneModel:
                 load_best_model_at_end=True,
                 metric_for_best_model="eval_loss",
                 greater_is_better=False,
-                evaluation_strategy="steps",
+                eval_strategy="steps",
                 save_steps=50,
                 save_total_limit=2,  # save only current and best
                 eval_steps=10,

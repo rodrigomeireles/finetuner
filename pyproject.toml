@@ -5,19 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "accelerate>=0.34.0",
     "bitsandbytes>=0.43.3",
-    "datasets>=0.12.0",
     "fire>=0.6.0",
-    "packaging>=0.10.1",
-    "peft",
-    "torch>=0.0.27.post2",
-    "triton>=3.0.0",
-    "trl",
-    "unsloth[cu121-torch240]",
+    "peft>=0.12.0",
+    "psutil>=6.0.0",
+    "transformers>=4.44.2",
+    "trl>=0.10.1",
+    "unsloth[cu121-torch230]",
     "wandb>=0.17.8",
-    "xformers",
 ]
 
 [tool.uv.sources]
-unsloth = { git = "https://github.com/unslothai/unsloth.git" }
+unsloth = { git = "https://github.com/rodrigomeireles/unsloth" }
